@@ -33,14 +33,14 @@ In Go there are two different type of package: an **executable** that generates 
 
 ## What does 'import "fmt"' mean
 
-The **import** statement give us access to all of the code and functionality in the “fmt” package, which is a standard library ([here]([Standard library - pkg.go.dev](https://pkg.go.dev/std)) you can find the official page).
+The **import** statement give us access to all of the code and functionality in the “fmt” package, which is a standard library ([here](https://pkg.go.dev/std) you can find the official page).
 
 
 
 ## How is the main.go file organized
 
 | **package main**      | Package declaration                         |
-| --------------------- | ------------------------------------------- |
+| :-------------------- | ------------------------------------------- |
 | **import “fmt”**      | **Import other packages we need**           |
 | **func main() { … }** | **Declare functions, tell Go to do things** |
 
