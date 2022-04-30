@@ -143,4 +143,29 @@ newPosition := r.Intn(len(d) - 1)
 
 ### Testing
 
-TODO
+To make a test, create a new file ending in _test.go. To run all the test tasks use the following instruction in the terminal:
+
+```go
+go test
+```
+
+Test functions admits **t *testing.T** as a parameter, which is a test Handler. Basically if a test goes wrong, we’ll tell the test handler that something hasn’t worked as expected, as the following portion of code:
+
+```go
+func TestNewDeck(t *testing.T) {
+	d := newDeck()
+
+	if len(d) != 52 {
+		t.Errorf("Expected deck lenght of 52, but got %v.", len(d))
+	}
+
+	if d[0] != "Ace of Spades" {
+		t.Errorf("Expected Ace of Spades as first card, but got %v.", d[0])
+	}
+
+	if d[len(d)-1] != "King of Clubs" {
+		t.Errorf("Expected King of Clubs as last card, but got %v.", d[len(d)-1])
+	}
+}
+```
+
