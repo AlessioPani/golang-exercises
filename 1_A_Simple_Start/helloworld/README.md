@@ -40,7 +40,7 @@ The **import** statement give us access to all of the code and functionality in 
 ## How is the main.go file organized
 
 | **package main**      | Package declaration                         |
-| :-------------------- | ------------------------------------------- |
+| :-------------------- | :------------------------------------------ |
 | **import “fmt”**      | **Import other packages we need**           |
 | **func main() { … }** | **Declare functions, tell Go to do things** |
 
