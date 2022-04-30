@@ -2,11 +2,11 @@
 
 ## Project Structure
 
-![](C:\Users\aless\Documents\Programmazione\GitHub\GolangExercises\2_Deeper_Into_Go\cards\img\cards_project.png)
+![](img/cards_project.png)
 
 
 
-![](C:\Users\aless\Documents\Programmazione\GitHub\GolangExercises\2_Deeper_Into_Go\cards\img\cards_folder.png)
+![](img/cards_folder.png)
 
 
 
@@ -131,7 +131,16 @@ r := rand.New(source)
 r.Intn(len(d) - 1)
 ```
 
-Only the int64 number remain to be determined yet. It’s been decided to use the time package. 
+Only the int64 number remain to be determined yet. It’s been decided to use the time package as the following code:
+
+```go
+source := rand.NewSource(time.Now().UnixNano())
+r := rand.New(source)
+newPosition := r.Intn(len(d) - 1)
+```
+
+
 
 ### Testing
 
+TODO
