@@ -4,7 +4,7 @@ A struct (short for *structure*) is a collection of properties that are related 
 
 The previous project (Cards) would have been more efficient using struct, as the following diagram shows:
 
-![struct_on_cards](img\struct_on_cards.png)
+<img src="img\struct_on_cards.png" alt="struct_on_cards" style="zoom:80%;" />
 
 
 
@@ -14,7 +14,7 @@ To get used to structs in Go we can create a new simple project.
 
 
 
-![people](img\people.png)
+<img src="img\people.png" alt="people" style="zoom:80%;" />
 
 
 
@@ -58,7 +58,7 @@ fmt.Printf("%+v", anotherAlex) //Prints fields and values in an explicit way
 {firstName: lastName:}
 ```
 
-![zero_values](img\zero_values.png)
+<img src="img\zero_values.png" alt="zero_values" style="zoom:80%;" />
 
 
 
@@ -77,7 +77,7 @@ fmt.Println(alex) //{John Depp}
 
 ### Embedding structs
 
-![embedding_structs](img\embedding_structs.png)
+<img src="img\embedding_structs.png" alt="embedding_structs" style="zoom:80%;" />
 
 ```go
 type person struct {
@@ -160,7 +160,7 @@ func (ptrToPerson *person) updateName(newFirstName string) {
 
 #### Value vs Reference types
 
-![reference_value_types](img\reference_value_types.png)
+<img src="img\reference_value_types.png" alt="reference_value_types" style="zoom:80%;" />
 
 * **Value types**: Go copy their values, we **must** use a pointer if we want to change their values using a function; we need their address in memory to actually make a change.
 
