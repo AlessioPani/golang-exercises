@@ -1,8 +1,6 @@
 # Maps
 
-![maps](img\maps.png)
-
-
+<img src="img\maps.png" alt="maps" style="zoom:80%;" />
 
 ## Declare a map
 
@@ -54,7 +52,7 @@ func printMap(m map[string]string) {
 
 ## Differences between Maps and Structs
 
-![maps_vs_struct](img\map_vs_struct.png)
+<img src="img\map_vs_struct.png" alt="maps_vs_struct"  />
 
 
 
