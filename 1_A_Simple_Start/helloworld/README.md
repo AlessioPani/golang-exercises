@@ -16,6 +16,12 @@ This instruction will compile and execute your code. If you want to only compile
 go build filename.go
 ```
 
+In order to create a package, use this instruction:
+
+```powershell
+go mod init github.com/YourUserName/module name
+```
+
 
 
 ## What does 'package main' mean
