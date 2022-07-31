@@ -235,3 +235,7 @@ func createTemplateCache() (map[string]*template.Template, error) {
 }
 ```
 
+### Passing data to templates
+
+### Routing
+
