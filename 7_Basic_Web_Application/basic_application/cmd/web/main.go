@@ -25,7 +25,6 @@ func main() {
 
 	repo := handlers.NewRepo(&app)
 	handlers.NewHandlers(repo)
-
 	renders.NewTemplates(&app)
 
 	serve := &http.Server{
