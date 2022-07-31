@@ -2,6 +2,7 @@ package renders
 
 import (
 	"basicWebApp/pkg/config"
+	"basicWebApp/pkg/models"
 	"fmt"
 	"html/template"
 	"log"
@@ -19,10 +20,22 @@ func NewTemplates(a *config.AppConfig) {
 	app = a
 }
 
+// AddDefaultData adds default data to templates
+func AddDefaultData(td *models.TemplateData) *models.TemplateData {
+	return td
+}
+
 // RenderTemplate renders a template using the automatic cache function
-func RenderTemplate(w http.ResponseWriter, tmpl string) {
-	// get the template cache from the AppConfig
-	tc := app.TemplateCache
+func RenderTemplate(w http.ResponseWriter, tmpl string, td *models.TemplateData) {
+
+	var tc map[string]*template.Template
+
+	if app.UseCache {
+		// get the template cache from the AppConfig
+		tc = app.TemplateCache
+	} else {
+		tc, _ = CreateTemplateCache()
+	}
 
 	// get requested template from cache
 	t, ok := tc[tmpl]
@@ -30,7 +43,9 @@ func RenderTemplate(w http.ResponseWriter, tmpl string) {
 		log.Fatal(ok)
 	}
 
-	err := t.Execute(w, nil)
+	td = AddDefaultData(td)
+
+	err := t.Execute(w, td)
 	if err != nil {
 		log.Fatal(err)
 	}

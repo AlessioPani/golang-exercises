@@ -1,16 +1,45 @@
 package handlers
 
 import (
+	"basicWebApp/pkg/config"
+	"basicWebApp/pkg/models"
 	"basicWebApp/pkg/renders"
 	"net/http"
 )
 
+// Repository is the repository type
+type Repository struct {
+	App *config.AppConfig
+}
+
+// Repo is the repository used by handlers
+var Repo *Repository
+
+// NewRepo creates a new repository
+func NewRepo(a *config.AppConfig) *Repository {
+	return &Repository{
+		App: a,
+	}
+}
+
+// NewHandlers sets the repository for handlers
+func NewHandlers(r *Repository) {
+	Repo = r
+}
+
 // Home is the homepage handler.
-func Home(w http.ResponseWriter, r *http.Request) {
-	renders.RenderTemplate(w, "home.page.gotmpl")
+func (pr *Repository) Home(w http.ResponseWriter, r *http.Request) {
+	renders.RenderTemplate(w, "home.page.gotmpl", &models.TemplateData{})
 }
 
 // About is the about page handler.
-func About(w http.ResponseWriter, r *http.Request) {
-	renders.RenderTemplate(w, "about.page.gotmpl")
+func (pr *Repository) About(w http.ResponseWriter, r *http.Request) {
+	// perform some logic
+	stringMap := make(map[string]string)
+	stringMap["test"] = "This come from template data."
+
+	// send data to template
+	renders.RenderTemplate(w, "about.page.gotmpl", &models.TemplateData{
+		StringMap: stringMap,
+	})
 }
