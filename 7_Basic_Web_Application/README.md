@@ -67,3 +67,49 @@ func Home(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
+
+
+### Use Template Layout 
+
+To reuse a barebone html template we can define a base layout with some blocks (like content, css, js, ...)
+
+```html
+// TEMPLATE
+{{define "base"}}
+
+... HTML content ...
+       
+	{{block "css" .}}{{end}}
+    {{block "content" .}}{{end}}
+    {{block "js" .}}{{end}}
+
+{{end}}
+
+```
+
+and then import that in other pages
+
+```html
+// HTML PAGE
+{{template "base" .}}
+
+{{define "content"}}
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <h1>This is the homepage.</h1>
+            <p>This is a paragraph.</p>
+        </div>
+    </div>
+</div>
+{{end}}
+```
+
+To be read by the backend, the renderer must be updated for example in this way:
+
+```go
+parsedTemplate, _ := template.ParseFiles("./templates/"+tmpl, "./templates/base.layout.gotmpl")
+```
+
+### Rendering optimization
+
