@@ -113,3 +113,60 @@ parsedTemplate, _ := template.ParseFiles("./templates/"+tmpl, "./templates/base.
 
 ### Rendering optimization
 
+There are 2 two ways to optimize the template rendering task, instead of always load the page from disk on every request.
+
+#### Data structure
+
+Instead of reading from the disk every single time I could have some kind of data structure I can store a parsed template into and then I'll check to see if the template exists in that data structure: if it does, I'll use it - if it doesn't, I'll read it from disk, parse it and then store the resulting template in that data structure.
+
+The best data structure to use in this case is a map.
+
+```go
+// tc is the template cache
+var tc = make(map[string]*template.Template)
+
+// RenderTemplate renders the required template loading it from cache, if it is there.
+func RenderTemplate(w http.ResponseWriter, t string) {
+	var tmpl *template.Template
+	var err error
+
+	// Check to see if we already have the template in our cache
+	_, inMap := tc[t]
+	if !inMap {
+		fmt.Println("creating template and reading from cache")
+		err = createTemplateCache(t)
+		if err != nil {
+			fmt.Println(err)
+		}
+	} else {
+		// we have the template in the cache
+		fmt.Println("using cached template...")
+	}
+
+	tmpl = tc[t]
+
+	err = tmpl.Execute(w, nil)
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
+// createTemplateCache populates the template cache
+func createTemplateCache(t string) error {
+	templates := []string{
+		"./templates/" + t,
+		"./templates/base.layout.gotmpl",
+	}
+
+	// parse the template
+	tmpl, err := template.ParseFiles(templates...)
+	if err != nil {
+		return err
+	}
+
+	// we add template in cache
+	tc[t] = tmpl
+	return nil
+}
+```
+
