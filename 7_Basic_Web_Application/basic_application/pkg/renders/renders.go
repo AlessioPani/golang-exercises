@@ -1,26 +1,81 @@
 package renders
 
 import (
+	"basicWebApp/pkg/config"
 	"fmt"
 	"html/template"
+	"log"
 	"net/http"
+	"path/filepath"
 )
 
 // tc is the template cache
 var tc = make(map[string]*template.Template)
 
-// RenderTemplateOld renders the required template loading it always from local disk.
-func RenderTemplateOld(w http.ResponseWriter, tmpl string) {
-	parsedTemplate, _ := template.ParseFiles("./templates/"+tmpl, "./templates/base.layout.gotmpl")
-	err := parsedTemplate.Execute(w, nil)
+var app *config.AppConfig
+
+// NewTemplates sets the config for the template package
+func NewTemplates(a *config.AppConfig) {
+	app = a
+}
+
+// RenderTemplate renders a template using the automatic cache function
+func RenderTemplate(w http.ResponseWriter, tmpl string) {
+	// get the template cache from the AppConfig
+	tc := app.TemplateCache
+
+	// get requested template from cache
+	t, ok := tc[tmpl]
+	if !ok {
+		log.Fatal(ok)
+	}
+
+	err := t.Execute(w, nil)
 	if err != nil {
-		fmt.Println("Error parsing template:", err)
-		return
+		log.Fatal(err)
 	}
 }
 
+// createTemplateCache populates the template cache - "automatic" way
+func CreateTemplateCache() (map[string]*template.Template, error) {
+	myCache := map[string]*template.Template{}
+
+	// get all of the files named *.page.gotmpl from ./templates
+	pages, err := filepath.Glob("./templates/*.page.gotmpl")
+	if err != nil {
+		return myCache, err
+	}
+
+	// range through all files ending with *.page.gotmpl
+	for _, page := range pages {
+		name := filepath.Base(page)
+		ts, err := template.New(name).ParseFiles(page)
+		if err != nil {
+			return myCache, err
+		}
+
+		// get all of the files named *.layout.gotmpl from ./templates
+		matches, err := filepath.Glob("./templates/*.layout.gotmpl")
+		if err != nil {
+			return myCache, err
+		}
+
+		if len(matches) > 0 {
+			ts, err = ts.ParseGlob("./templates/*.layout.gotmpl")
+			if err != nil {
+				return myCache, err
+			}
+		}
+
+		myCache[name] = ts
+	}
+
+	return myCache, nil
+}
+
 // RenderTemplate renders the required template loading it from cache, if it is there.
-func RenderTemplate(w http.ResponseWriter, t string) {
+// "Manual" cache.
+func RenderTemplateManual(w http.ResponseWriter, t string) {
 	var tmpl *template.Template
 	var err error
 
@@ -28,7 +83,7 @@ func RenderTemplate(w http.ResponseWriter, t string) {
 	_, inMap := tc[t]
 	if !inMap {
 		fmt.Println("creating template and reading from cache")
-		err = createTemplateCache(t)
+		err = createTemplateCacheManual(t)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -45,8 +100,8 @@ func RenderTemplate(w http.ResponseWriter, t string) {
 	}
 }
 
-// createTemplateCache populates the template cache
-func createTemplateCache(t string) error {
+// createTemplateCache populates the template cache - "manual" way
+func createTemplateCacheManual(t string) error {
 	templates := []string{
 		"./templates/" + t,
 		"./templates/base.layout.gotmpl",
@@ -61,4 +116,14 @@ func createTemplateCache(t string) error {
 	// we add template in cache
 	tc[t] = tmpl
 	return nil
+}
+
+// RenderTemplateOld renders the required template loading it always from local disk.
+func RenderTemplateNonOptimized(w http.ResponseWriter, tmpl string) {
+	parsedTemplate, _ := template.ParseFiles("./templates/"+tmpl, "./templates/base.layout.gotmpl")
+	err := parsedTemplate.Execute(w, nil)
+	if err != nil {
+		fmt.Println("Error parsing template:", err)
+		return
+	}
 }

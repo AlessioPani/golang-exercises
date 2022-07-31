@@ -1,8 +1,11 @@
 package main
 
 import (
+	"basicWebApp/pkg/config"
 	"basicWebApp/pkg/handlers"
+	"basicWebApp/pkg/renders"
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -11,6 +14,15 @@ const portNumber = ":8080"
 
 // main is the entry point.
 func main() {
+	var app config.AppConfig
+
+	tc, err := renders.CreateTemplateCache()
+	if err != nil {
+		log.Fatal("cannot create template cache")
+	}
+	app.TemplateCache = tc
+
+	renders.NewTemplates(&app)
 
 	http.HandleFunc("/", handlers.Home)
 	http.HandleFunc("/about", handlers.About)

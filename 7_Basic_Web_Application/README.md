@@ -113,11 +113,11 @@ parsedTemplate, _ := template.ParseFiles("./templates/"+tmpl, "./templates/base.
 
 ### Rendering optimization
 
-There are 2 two ways to optimize the template rendering task, instead of always load the page from disk on every request.
+There are 2 two ways to optimize the template rendering task, instead of always load the page from disk on every request, I could have some kind of data structure as cache. This cache can be filled in a manual or an automatic way.
 
-#### Data structure
+#### Manual 
 
-Instead of reading from the disk every single time I could have some kind of data structure I can store a parsed template into and then I'll check to see if the template exists in that data structure: if it does, I'll use it - if it doesn't, I'll read it from disk, parse it and then store the resulting template in that data structure.
+Instead of reading from the disk every single time I could have some kind of data structure. I can store a parsed template into and then I'll check to see if the template exists in that data structure: if it does, I'll use it - if it doesn't, I'll read it from disk, parse it and then store the resulting template in that data structure.
 
 The best data structure to use in this case is a map.
 
@@ -126,7 +126,7 @@ The best data structure to use in this case is a map.
 var tc = make(map[string]*template.Template)
 
 // RenderTemplate renders the required template loading it from cache, if it is there.
-func RenderTemplate(w http.ResponseWriter, t string) {
+func RenderTemplateManual(w http.ResponseWriter, t string) {
 	var tmpl *template.Template
 	var err error
 
@@ -134,7 +134,7 @@ func RenderTemplate(w http.ResponseWriter, t string) {
 	_, inMap := tc[t]
 	if !inMap {
 		fmt.Println("creating template and reading from cache")
-		err = createTemplateCache(t)
+		err = createTemplateCacheManual(t)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -151,8 +151,8 @@ func RenderTemplate(w http.ResponseWriter, t string) {
 	}
 }
 
-// createTemplateCache populates the template cache
-func createTemplateCache(t string) error {
+// createTemplateCacheManual populates the template cache
+func createTemplateCacheManual(t string) error {
 	templates := []string{
 		"./templates/" + t,
 		"./templates/base.layout.gotmpl",
@@ -167,6 +167,71 @@ func createTemplateCache(t string) error {
 	// we add template in cache
 	tc[t] = tmpl
 	return nil
+}
+```
+
+#### Automatic
+
+Similar to the manual way, but the cache is entirely built during the first rendering request.
+
+```go
+// tc is the template cache
+var tc = make(map[string]*template.Template)
+
+// RenderTemplate renders a template using the automatic cache function
+func RenderTemplate(w http.ResponseWriter, tmpl string) {
+	// create a template cache
+	tc, err := createTemplateCache()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// get requested template from cache
+	t, ok := tc[tmpl]
+	if !ok {
+		log.Fatal(err)
+	}
+
+	err = t.Execute(w, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+// createTemplateCache populates the template cache - "automatic" way
+func createTemplateCache() (map[string]*template.Template, error) {
+	myCache := map[string]*template.Template{}
+
+	// get all of the files named *.page.gotmpl from ./templates
+	pages, err := filepath.Glob("./templates/*.page.gotmpl")
+	if err != nil {
+		return myCache, err
+	}
+
+	// range through all files ending with *.page.gotmpl
+	for _, page := range pages {
+		name := filepath.Base(page)
+		ts, err := template.New(name).ParseFiles(page)
+		if err != nil {
+			return myCache, err
+		}
+
+		matches, err := filepath.Glob("./templates/*.layout.gotmpl")
+		if err != nil {
+			return myCache, err
+		}
+
+		if len(matches) > 0 {
+			ts, err = ts.ParseGlob("./templates/*.layout.gotmpl")
+			if err != nil {
+				return myCache, err
+			}
+		}
+
+		myCache[name] = ts
+	}
+
+	return myCache, nil
 }
 ```
 
