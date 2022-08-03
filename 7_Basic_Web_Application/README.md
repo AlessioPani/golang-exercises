@@ -291,3 +291,27 @@ err = serve.ListenAndServe()
 
 ##### Custom middleware
 
+```go
+// Custom middleware
+
+func WriteToConsole(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("Hit the page")
+		next.ServeHTTP(w, r)
+	})
+}
+
+// routes.go
+func routes(a *config.AppConfig) http.Handler {
+
+	[...]
+    
+	mux.Use(WriteToConsole)
+
+	[...]
+}
+
+```
+
+### Session manager
+
