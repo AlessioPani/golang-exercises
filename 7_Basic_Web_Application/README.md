@@ -315,3 +315,7 @@ func routes(a *config.AppConfig) http.Handler {
 
 ### Session manager
 
+```shell
+go get github.com/alexedwards/scs/v2
+```
+
