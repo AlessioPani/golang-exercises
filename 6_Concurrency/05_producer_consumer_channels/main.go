@@ -33,7 +33,7 @@ func makePizza(pizzaNumber int) *PizzaOrder {
 	pizzaNumber++
 	if pizzaNumber <= NumberOfPizzas {
 		delay := rand.Intn(5) + 1
-		fmt.Println("Received order number %d!", pizzaNumber)
+		fmt.Printf("Received order number %d!\n", pizzaNumber)
 
 		rnd := rand.Intn(12) + 1
 		msg := ""
@@ -46,18 +46,18 @@ func makePizza(pizzaNumber int) *PizzaOrder {
 		}
 		total++
 
-		fmt.Println("Making pizza number %d, it will take %d seconds...", pizzaNumber, delay)
+		fmt.Printf("Making pizza number %d, it will take %d seconds...\n", pizzaNumber, delay)
 
 		//delay for a bit
 		time.Sleep(time.Duration(delay) * time.Second)
 
 		if rnd <= 2 {
-			msg = fmt.Sprintf("*** We ran out of ingredients for pizza %d!", pizzaNumber)
+			msg = fmt.Sprintf("*** We ran out of ingredients for pizza %d!\n", pizzaNumber)
 		} else if rnd <= 4 {
-			msg = fmt.Sprintf("*** The cook quit while making pizza %d!", pizzaNumber)
+			msg = fmt.Sprintf("*** The cook quit while making pizza %d!\n", pizzaNumber)
 		} else {
 			success = true
-			msg = fmt.Sprintf("Pizza order number %d is ready!", pizzaNumber)
+			msg = fmt.Sprintf("Pizza order number %d is ready!\n", pizzaNumber)
 		}
 
 		p := PizzaOrder{
@@ -82,9 +82,23 @@ func pizzeria(pizzaMaker *Producer) {
 
 	// try to make pizzas
 	for {
-		currentPizza := makePizza(i)
 		// try to make pizza
+		currentPizza := makePizza(i)
+
 		// decision
+		if currentPizza != nil {
+			i = currentPizza.pizzaNumber
+			select {
+			// we tried to make a pizza, we sent something to data channel
+			case pizzaMaker.data <- *currentPizza:
+
+			case quitChan := <-pizzaMaker.quit:
+				// close channels
+				close(pizzaMaker.data)
+				close(quitChan)
+				return
+			}
+		}
 	}
 }
 
@@ -108,6 +122,40 @@ func main() {
 	go pizzeria(pizzaJob)
 
 	// create and run consumer
+	for i := range pizzaJob.data {
+		if i.pizzaNumber <= NumberOfPizzas {
+			if i.success {
+				color.Green(i.message)
+				color.Green("Order no. %d is out for delivery", i.pizzaNumber)
+			} else {
+				color.Red(i.message)
+				color.Red("*** The customer is really mad")
+			}
+		} else {
+			color.Cyan("Done making pizzas")
+			err := pizzaJob.Close()
+			if err != nil {
+				color.Red("*** Error closing channel", err)
+			}
+		}
+	}
 
 	// print out the ending message
+	color.Cyan("----------------")
+	color.Cyan("Done for the day")
+
+	color.Cyan("We made %d pizzas, but failed to make %d, with %d attempts in total", pizzasMade, pizzasFailed, total)
+
+	switch {
+	case pizzasFailed > 9:
+		color.Red("It was an awful day...")
+	case pizzasFailed >= 6:
+		color.Red("It was not a very good day...")
+	case pizzasFailed >= 4:
+		color.Yellow("It was an okay day...")
+	case pizzasFailed >= 2:
+		color.Yellow("It was a pretty good day...")
+	default:
+		color.Green("It was a great day...")
+	}
 }
