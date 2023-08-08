@@ -11,7 +11,13 @@ import (
 // appends a few exclamation marks, and then sends the transformed text to the pong channel.
 func shout(ping <-chan string, pong chan<- string) {
 	for {
-		s := <-ping
+		s, ok := <-ping
+		if !ok {
+			// do something
+			// ok is a boolean parameter. True if a returned value is actually
+			// a value sent to the channel; False if the value comes from a
+			// closed channel.
+		}
 		pong <- fmt.Sprintf("%s!!!", strings.ToUpper(s))
 	}
 }
